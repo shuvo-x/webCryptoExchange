@@ -8,28 +8,32 @@ export const Login = () => {
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const [formData, setFormData] = useState({ email: '', password: '' });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setErrorMsg('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
-    setTimeout(() => {
-      login(formData.email, formData.password);
-      setIsLoading(false);
+    setErrorMsg('');
+    try {
+      await login(formData.email, formData.password);
       navigate('/wallet');
-    }, 1200);
+    } catch (err) {
+      setErrorMsg(err.message === 'Invalid login credentials' ? 'ভুল ইমেইল বা পাসওয়ার্ড।' : err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div style={{ background: '#121418', minHeight: 'calc(100vh - 64px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', fontFamily: 'sans-serif', color: '#fff' }}>
       <div style={{ width: '100%', maxWidth: '440px', background: '#1e2329', borderRadius: '16px', border: '1px solid #2b313a', padding: '40px', boxShadow: '0px 20px 40px rgba(0,0,0,0.4)' }}>
-        
-        {/* Header */}
+
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#f0b90b', fontWeight: 'bold', fontSize: '20px', marginBottom: '12px' }}>
             <ShieldCheck size={26} /> NEXTEX Exchange
@@ -38,7 +42,12 @@ export const Login = () => {
           <p style={{ color: '#848e9c', fontSize: '13px', margin: 0 }}>Welcome back! Please enter your details.</p>
         </div>
 
-        {/* Form */}
+        {errorMsg && (
+          <div style={{ background: 'rgba(246, 70, 93, 0.1)', color: '#f6465d', padding: '10px 14px', borderRadius: '6px', fontSize: '13px', marginBottom: '16px', textAlign: 'center' }}>
+            {errorMsg}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
             <label style={{ fontSize: '12px', color: '#848e9c', display: 'block', marginBottom: '6px', fontWeight: 'bold' }}>Email Address</label>
@@ -51,17 +60,7 @@ export const Login = () => {
                 placeholder="name@example.com"
                 value={formData.email}
                 onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px 12px 12px 40px',
-                  background: '#181a20',
-                  border: '1px solid #2b313a',
-                  borderRadius: '6px',
-                  color: '#fff',
-                  fontSize: '14px',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
+                style={{ width: '100%', padding: '12px 12px 12px 40px', background: '#181a20', border: '1px solid #2b313a', borderRadius: '6px', color: '#fff', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
               />
             </div>
           </div>
@@ -80,17 +79,7 @@ export const Login = () => {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
-                style={{
-                  width: '100%',
-                  padding: '12px 40px 12px 40px',
-                  background: '#181a20',
-                  border: '1px solid #2b313a',
-                  borderRadius: '6px',
-                  color: '#fff',
-                  fontSize: '14px',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                }}
+                style={{ width: '100%', padding: '12px 40px 12px 40px', background: '#181a20', border: '1px solid #2b313a', borderRadius: '6px', color: '#fff', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
               />
               <button
                 type="button"
@@ -105,28 +94,12 @@ export const Login = () => {
           <button
             type="submit"
             disabled={isLoading}
-            style={{
-              width: '100%',
-              background: '#f0b90b',
-              color: '#000',
-              border: 'none',
-              padding: '14px',
-              borderRadius: '6px',
-              fontWeight: 'bold',
-              fontSize: '15px',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              marginTop: '10px',
-            }}
+            style={{ width: '100%', background: '#f0b90b', color: '#000', border: 'none', padding: '14px', borderRadius: '6px', fontWeight: 'bold', fontSize: '15px', cursor: isLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '10px' }}
           >
             {isLoading ? 'Logging in...' : 'Log In'} <ArrowRight size={18} />
           </button>
         </form>
 
-        {/* Footer Link */}
         <div style={{ marginTop: '24px', textAlign: 'center', fontSize: '13px', color: '#848e9c' }}>
           Don't have an account?{' '}
           <Link to="/signup" style={{ color: '#f0b90b', textDecoration: 'none', fontWeight: 'bold' }}>

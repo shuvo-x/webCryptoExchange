@@ -1,10 +1,15 @@
-// PnL/liquidation logic এক জায়গায় - ActivePositions.jsx আর OrderForm.jsx দুই জায়গাতেই দরকার,
-// financial logic বলেই এটা আলাদা করে unit-test করা জরুরি
+// Supabase numeric column গুলো JS-এ মাঝেমাঝে string হিসেবে আসে (PostgREST behavior),
+// তাই এখানে Number() দিয়ে coerce করা হচ্ছে - এটাই NaN bug-এর root cause ছিল
 export const calculatePnL = (position, currentPrice) => {
   if (!currentPrice || !position) return 0;
-  const priceDiff = currentPrice - position.entryPrice;
+  const entryPrice = Number(position.entryPrice ?? position.entry_price);
+  const margin = Number(position.margin);
+  const leverage = Number(position.leverage);
+  if (!entryPrice || !margin || !leverage) return 0;
+
+  const priceDiff = currentPrice - entryPrice;
   const direction = position.type === 'LONG' ? 1 : -1;
-  return (priceDiff / position.entryPrice) * position.margin * position.leverage * direction;
+  return (priceDiff / entryPrice) * margin * leverage * direction;
 };
 
 export const calculateLiquidationPrice = (entryPrice, leverage, type) => {
